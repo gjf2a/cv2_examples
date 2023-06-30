@@ -13,8 +13,7 @@ def morph_contour_loop(video_port, kernel_side):
 
         cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)
         cv2.drawContours(frame, close_contour, -1, (0, 0, 255), 3)
-
-        print(farthest_x_y(close_contour))
+        cv2.drawContours(frame, local_minima(close_contour), -1, (255, 0, 0), 3)
 
         # Display the resulting frame
         cv2.imshow('frame', frame)
@@ -55,6 +54,25 @@ def find_close_contour(contours, height):
 def farthest_x_y(contour):
     min_y_index = np.argmin(contour[:, :, 1])
     return contour[min_y_index][0]
+
+
+def local_minima(close_contour):
+    current_low_start = 0
+    minima = []
+    for i, pt in enumerate(close_contour):
+        if i + 1 < len(close_contour) and pt[0][1] > close_contour[i + 1][0][1]:
+            current_low_start = i + 1
+        elif current_low_start is not None and (i + 1 == len(close_contour) or pt[0][1] < close_contour[i + 1][0][1]):
+            minima.append((current_low_start, i))
+            current_low_start = None
+
+    all_local_minima = []
+    for (start, end) in minima:
+        pts = np.empty((end - start + 1, 1, 2), dtype=close_contour[0].dtype)
+        for i, m in enumerate(range(start, end + 1)):
+            pts[i] = close_contour[m]
+        all_local_minima.append(pts)
+    return all_local_minima
 
 
 def contour_x_bounds(contour):

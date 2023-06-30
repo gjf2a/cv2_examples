@@ -9,11 +9,12 @@ def morph_contour_loop(video_port, kernel_side):
     while True:
         ret, frame = cap.read()
         contours, hierarchy = find_contours(frame, kernel_size)
+        close_contour = find_close_contour(contours, cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
         cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)
-        #cv2.drawContours(frame, purged_behind(contours), -1, (0, 0, 255), 3)
-        cv2.drawContours(frame, close_contour(contours, cap.get(cv2.CAP_PROP_FRAME_HEIGHT)), -1, (0, 0, 255), 3)
-        #cv2.drawContours(frame, close_contour(purged_behind(contours), cap.get(cv2.CAP_PROP_FRAME_HEIGHT)), -1, (255, 0, 0), 3)
+        cv2.drawContours(frame, close_contour, -1, (0, 0, 255), 3)
+
+        print(farthest_x_y(close_contour))
 
         # Display the resulting frame
         cv2.imshow('frame', frame)
@@ -39,19 +40,7 @@ def find_contours(frame, kernel_size):
     return contours, hierarchy
 
 
-def purged_behind(contours):
-    contours = sorted(contours, key=lambda c: -np.max(c[:,:,1]))
-    purged = set()
-    for i in range(len(contours)):
-        min_x_front, max_x_front = contour_x_bounds(contours[i])
-        for j in range(i + 1, len(contours)):
-            min_x_back, max_x_back = contour_x_bounds(contours[j])
-            if min_x_back >= min_x_front and max_x_back <= max_x_front:
-                purged.add(j)
-    return [contours[i] for i in range(len(contours)) if i not in purged]
-
-
-def close_contour(contours, height):
+def find_close_contour(contours, height):
     best_xs = {}
     for contour in contours:
         for point in contour:
@@ -63,8 +52,9 @@ def close_contour(contours, height):
     return close_contour
 
 
-def farthest_x_y(contours):
-    pass
+def farthest_x_y(contour):
+    min_y_index = np.argmin(contour[:, :, 1])
+    return contour[min_y_index][0]
 
 
 def contour_x_bounds(contour):

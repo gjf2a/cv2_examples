@@ -1,5 +1,3 @@
-# From perplexity.ai: "write a python opencv program doing simple image processing on a live feed"
-
 import sys
 import cv2
 import numpy as np
@@ -13,7 +11,9 @@ def morph_contour_loop(video_port, kernel_side):
         contours, hierarchy = find_contours(frame, kernel_size)
 
         cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)
-        cv2.drawContours(frame, purged_behind(contours), -1, (0, 0, 255), 3)
+        #cv2.drawContours(frame, purged_behind(contours), -1, (0, 0, 255), 3)
+        cv2.drawContours(frame, close_contour(contours, cap.get(cv2.CAP_PROP_FRAME_HEIGHT)), -1, (0, 0, 255), 3)
+        #cv2.drawContours(frame, close_contour(purged_behind(contours), cap.get(cv2.CAP_PROP_FRAME_HEIGHT)), -1, (255, 0, 0), 3)
 
         # Display the resulting frame
         cv2.imshow('frame', frame)
@@ -35,7 +35,7 @@ def find_contours(frame, kernel_size):
 
     # Contour material from https://docs.opencv.org/4.x/d4/d73/tutorial_py_contours_begin.html
     ret, thresh = cv2.threshold(filtered, 127, 255, 0)
-    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
     return contours, hierarchy
 
 
@@ -49,6 +49,22 @@ def purged_behind(contours):
             if min_x_back >= min_x_front and max_x_back <= max_x_front:
                 purged.add(j)
     return [contours[i] for i in range(len(contours)) if i not in purged]
+
+
+def close_contour(contours, height):
+    best_xs = {}
+    for contour in contours:
+        for point in contour:
+            if point[0][1] < height - 1 and (point[0][0] not in best_xs or point[0][1] > best_xs[point[0][0]]):
+                best_xs[point[0][0]] = point[0][1]
+    close_contour = np.empty((len(best_xs), 1, 2), dtype=contours[0].dtype)
+    for i, (x, y) in enumerate(best_xs.items()):
+        close_contour[i] = np.array([[x, y]])
+    return close_contour
+
+
+def farthest_x_y(contours):
+    pass
 
 
 def contour_x_bounds(contour):

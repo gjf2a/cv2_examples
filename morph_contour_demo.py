@@ -56,13 +56,13 @@ def farthest_x_y(contour):
     return contour[min_y_index][0]
 
 
-def local_minima(close_contour):
+def local_minima(close_contour, tolerance=1):
     current_low_start = 0
     minima = []
     for i, pt in enumerate(close_contour):
-        if i + 1 < len(close_contour) and pt[0][1] > close_contour[i + 1][0][1]:
+        if i + 1 < len(close_contour) and pt[0][1] - tolerance > close_contour[i + 1][0][1]:
             current_low_start = i + 1
-        elif current_low_start is not None and (i + 1 == len(close_contour) or pt[0][1] < close_contour[i + 1][0][1]):
+        elif current_low_start is not None and (i + 1 == len(close_contour) or pt[0][1] + tolerance < close_contour[i + 1][0][1]):
             minima.append((current_low_start, i))
             current_low_start = None
 

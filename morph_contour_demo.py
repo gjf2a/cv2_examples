@@ -13,7 +13,16 @@ def morph_contour_loop(video_port, kernel_side):
 
         cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)
         cv2.drawContours(frame, close_contour, -1, (0, 0, 255), 3)
-        cv2.drawContours(frame, local_minima(close_contour), -1, (255, 0, 0), 3)
+        clusters = find_contour_clusters(close_contour)
+        #print(clusters)
+        #print(len(clusters))
+
+        for i, cluster in enumerate(clusters):
+            red = (255 * i if i % 2 == 0 else 255 * (len(clusters) - i)) // len(clusters)
+            cv2.drawContours(frame, cluster, -1, (red, 128, 128), 3)
+        #print(sorted_contour_list(close_contour))
+        #sys.exit(1)
+        #cv2.drawContours(frame, local_minima(close_contour), -1, (255, 0, 0), 3)
 
         # Display the resulting frame
         cv2.imshow('frame', frame)
@@ -73,6 +82,30 @@ def local_minima(close_contour, tolerance=1):
             pts[i] = close_contour[m]
         all_local_minima.append(pts)
     return all_local_minima
+
+
+def sorted_contour_list(close_contour):
+    return [(pt[0][0], pt[0][1]) for pt in sorted(list(close_contour), key=lambda pt: (pt[0][1], pt[0][0]))]
+
+
+def find_contour_clusters(close_contour):
+    clusters = []
+    cluster = []
+    x_sorted = [(pt[0][0], pt[0][1]) for pt in sorted(list(close_contour), key=lambda pt: (pt[0,0], pt[0,1]))]
+    for (x, y) in x_sorted:
+        if len(cluster) == 0 or (cluster[-1][0] + 1 == x and abs(cluster[-1][1] - y) <= 1):
+            cluster.append((x, y))
+        else:
+            clusters.append(cluster)
+            cluster = [(x, y)]
+    clusters.append(cluster)
+    result = []
+    for cluster in clusters:
+        pts = np.empty((len(cluster), 1, 2), dtype=close_contour[0].dtype)
+        for i in range(len(cluster)):
+            pts[i] = cluster[i]
+        result.append(pts)
+    return result
 
 
 def contour_x_bounds(contour):

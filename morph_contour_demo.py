@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 
 
-def morph_contour_loop(video_port, kernel_side):
+def morph_contour_loop(video_port, kernel_side, min_space_width):
     kernel_size = (kernel_side, kernel_side)
     cap = cv2.VideoCapture(video_port)
     while True:
@@ -12,14 +12,16 @@ def morph_contour_loop(video_port, kernel_side):
         close_contour = find_close_contour(contours, cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
         cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)
-        cv2.drawContours(frame, close_contour, -1, (0, 0, 255), 3)
+        cv2.drawContours(frame, close_contour, -1, (255, 0, 0), 3)
         clusters = find_contour_clusters(close_contour)
+        best = best_contour_cluster(clusters, min_space_width)
+        cv2.drawContours(frame, best, -1, (0, 0, 255), 3)
         #print(clusters)
         #print(len(clusters))
 
-        for i, cluster in enumerate(clusters):
-            red = (255 * i if i % 2 == 0 else 255 * (len(clusters) - i)) // len(clusters)
-            cv2.drawContours(frame, cluster, -1, (red, 128, 128), 3)
+        #for i, cluster in enumerate(clusters):
+        #    red = (255 * i if i % 2 == 0 else 255 * (len(clusters) - i)) // len(clusters)
+        #    cv2.drawContours(frame, cluster, -1, (red, 128, 128), 3)
         #print(sorted_contour_list(close_contour))
         #sys.exit(1)
         #cv2.drawContours(frame, local_minima(close_contour), -1, (255, 0, 0), 3)
@@ -108,13 +110,22 @@ def find_contour_clusters(close_contour):
     return result
 
 
+def best_contour_cluster(contour_clusters, min_space_width):
+    heights = [max([c[0, 1] for c in cluster]) for cluster in contour_clusters]
+    min_i = None
+    for i in range(len(contour_clusters)):
+        if min_i is None or heights[i] < heights[min_i] and len(contour_clusters[i]) > min_space_width:
+            min_i = i
+    return contour_clusters[min_i]
+
+
 def contour_x_bounds(contour):
     return np.min(contour[:,:,0]), np.max(contour[:,:,0])
 
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
-        print("Usage: morph_contour_demo.py video_port kernel_side")
+        print("Usage: morph_contour_demo.py video_port kernel_side min_space_width")
     else:
-        morph_contour_loop(int(sys.argv[1]), int(sys.argv[2]))
+        morph_contour_loop(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))
 

@@ -43,7 +43,6 @@ def morph_contour_loop(video_port, kernel_side, min_space_width):
 
 def contour_inner_loop(cap, kernel_size, min_space_width):
     ret, frame = cap.read()
-    frame = cv2.resize(frame, (640, 480))
     contours, hierarchy = find_contours(frame, kernel_size)
     close_contour = find_close_contour(contours, cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     clusters = find_contour_clusters(close_contour)

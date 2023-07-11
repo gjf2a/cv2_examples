@@ -16,15 +16,6 @@ def morph_contour_loop(video_port, kernel_side, min_space_width):
         clusters = find_contour_clusters(close_contour)
         best = best_contour_cluster(clusters, min_space_width)
         cv2.drawContours(frame, best, -1, (0, 0, 255), 3)
-        #print(clusters)
-        #print(len(clusters))
-
-        #for i, cluster in enumerate(clusters):
-        #    red = (255 * i if i % 2 == 0 else 255 * (len(clusters) - i)) // len(clusters)
-        #    cv2.drawContours(frame, cluster, -1, (red, 128, 128), 3)
-        #print(sorted_contour_list(close_contour))
-        #sys.exit(1)
-        #cv2.drawContours(frame, local_minima(close_contour), -1, (255, 0, 0), 3)
 
         # Display the resulting frame
         cv2.imshow('frame', frame)
@@ -65,25 +56,6 @@ def find_close_contour(contours, height):
 def farthest_x_y(contour):
     min_y_index = np.argmin(contour[:, :, 1])
     return contour[min_y_index][0]
-
-
-def local_minima(close_contour, tolerance=1):
-    current_low_start = 0
-    minima = []
-    for i, pt in enumerate(close_contour):
-        if i + 1 < len(close_contour) and pt[0][1] - tolerance > close_contour[i + 1][0][1]:
-            current_low_start = i + 1
-        elif current_low_start is not None and (i + 1 == len(close_contour) or pt[0][1] + tolerance < close_contour[i + 1][0][1]):
-            minima.append((current_low_start, i))
-            current_low_start = None
-
-    all_local_minima = []
-    for (start, end) in minima:
-        pts = np.empty((end - start + 1, 1, 2), dtype=close_contour[0].dtype)
-        for i, m in enumerate(range(start, end + 1)):
-            pts[i] = close_contour[m]
-        all_local_minima.append(pts)
-    return all_local_minima
 
 
 def sorted_contour_list(close_contour):

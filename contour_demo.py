@@ -3,7 +3,10 @@
 import cv2
 import numpy as np
 
+from morph_contour_demo import Timer
+
 cap = cv2.VideoCapture(1)
+timer = Timer()
 
 while True:
     # Capture frame-by-frame
@@ -19,12 +22,15 @@ while True:
 
     # Display the resulting frame
     cv2.imshow('frame', frame)
+    timer.inc()
 
     # Exit the loop if 'q' is pressed
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
 # Release the capture and destroy all windows
+fps = timer.elapsed()
 cap.release()
 cv2.destroyAllWindows()
 
+print(fps)

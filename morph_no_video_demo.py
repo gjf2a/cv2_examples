@@ -1,7 +1,7 @@
 from morph_contour_demo import Timer, contour_inner_loop
 import cv2
 
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 kernel_size = (9, 9)
 
 timer = Timer()

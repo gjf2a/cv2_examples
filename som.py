@@ -2,14 +2,17 @@ import numpy as np
 
 
 class Som:
-    def __init__(self, size, inner_dim):
+    def __init__(self, size, inner_dim, rng=None):
         if type(inner_dim) == int:
             inner_dim = (inner_dim,)
         self.inner_dim = inner_dim
         if type(size) == int:
             size = (size, size)
         som_dim = size + inner_dim
-        self.som = np.zeros(som_dim)
+        if rng is None:
+            self.som = np.zeros(som_dim)
+        else:
+            self.som = np.random.random(som_dim)
 
     def classify(self, example):
         assert self.inner_dim == example.shape
@@ -25,5 +28,5 @@ class Som:
 
 
 if __name__ == '__main__':
-    s = Som((3, 2), 7)
+    s = Som((3, 2), 7, np.random.default_rng())
     print(s.som)

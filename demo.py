@@ -4,7 +4,7 @@ import cv2
 from morph_contour_demo import Timer
 
 # Create a VideoCapture object to capture video from the camera
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
 timer = Timer()
 

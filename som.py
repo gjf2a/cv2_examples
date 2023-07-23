@@ -1,4 +1,5 @@
 import numpy as np
+import unittest
 
 
 class Som:
@@ -25,6 +26,12 @@ class Som:
                     best_distance = dist
                     best_node = (i, j)
         return best_node
+
+
+class SomTests(unittest.TestCase):
+    def test_zeroed(self):
+        s = Som(2, 3)
+
 
 
 if __name__ == '__main__':

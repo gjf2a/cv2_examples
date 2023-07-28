@@ -1,5 +1,12 @@
+import math
+
 import numpy as np
 import unittest
+
+
+def distance_weight(winning_node, current_node, radius):
+    distance = ((current_node[0] - winning_node[0])**2 + (current_node[1] - winning_node[1])**2)**0.5
+    return 1.0 - min(1.0, distance / radius)
 
 
 class Som:
@@ -27,11 +34,21 @@ class Som:
                     best_node = (i, j)
         return best_node
 
+    def train(self, example, learning_rate, radius):
+        best_node = self.classify(example)
+        for i in range(self.som.shape[0]):
+            for j in range(self.som.shape[1]):
+                self.som[i][j] += learning_rate * distance_weight(best_node, (i, j), radius) * (example - self.som[i][j])
+
 
 class SomTests(unittest.TestCase):
     def test_zeroed(self):
         s = Som(2, 3)
-
+        s.train(np.array([1, 1, 1]), 1.0, 1.0)
+        s.train(np.array([-1, -1, -1]), 1.0, 1.0)
+        assert s.classify(np.array([1, 1, 1])) == (0, 0)
+        assert s.classify(np.array([-1, -1, -1])) == (0, 1)
+        print(s.som)
 
 
 if __name__ == '__main__':

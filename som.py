@@ -16,6 +16,7 @@ class Som:
         self.inner_dim = inner_dim
         if type(size) == int:
             size = (size, size)
+        self.size = size
         som_dim = size + inner_dim
         if rng is None:
             self.som = np.zeros(som_dim)
